@@ -56,13 +56,16 @@ docker compose up -d
 
 **Stacks** → **Add stack**
 - **Name**: `heimdall`
-- **Build method**: 
-  - **Git Repository**:
-    - Repository URL: `https://git.ictiberia.com/groales/heimdall`
-    - Repository reference: `refs/heads/main`
-    - Compose path: `docker-compose.yml`
-  - O **Web editor**: Pegar contenido de `docker-compose.yml`
+- **Build method**: **Git Repository**
+  - **Repository URL**: `https://git.ictiberia.com/groales/heimdall`
+  - **Repository reference**: `refs/heads/main`
+  - **Compose path**: `docker-compose.yml`
+  - **Additional paths** (opcional):
+    - Para Traefik: `docker-compose.override.traefik.yml.example`
+    - Para NPM: `docker-compose.override.npm.yml.example`
 - **Deploy the stack**
+
+**Nota**: Si usas **Additional paths**, no necesitas copiar el archivo a `.override.yml`. Portainer fusiona automáticamente los archivos especificados.
 
 #### 2. Verificar despliegue
 
@@ -108,13 +111,45 @@ Para habilitar:
 - Proporcionar **API Key** del servicio
 - Configurar **Enhanced options**
 
-## Integración con NGINX Proxy Manager
+## Integración con Proxy Inverso
 
-### 1. Conectar a red proxy
+Este repositorio incluye archivos override para facilitar la integración:
+- `docker-compose.override.traefik.yml.example` - Para Traefik
+- `docker-compose.override.npm.yml.example` - Para NGINX Proxy Manager
+
+### Con Traefik
+
+**Desde Portainer (Git)**:
+- **Additional paths**: `docker-compose.override.traefik.yml.example`
+- Editar dominio en el archivo antes de desplegar, o después desde Stack Editor
+
+**Desde CLI**:
+```bash
+cp docker-compose.override.traefik.yml.example docker-compose.override.yml
+# Editar dominio en docker-compose.override.yml
+docker compose up -d
+```
+
+Accede a: `https://heimdall.tudominio.com`
+
+### Con NGINX Proxy Manager
+
+#### 1. Conectar a red proxy
 
 La red `proxy` se crea automáticamente al desplegar el stack (compartida con NPM).
 
-### 2. Configurar Proxy Host en NPM
+#### 2. Desplegar (Opcional con override)
+
+**Desde Portainer**: Usar `docker-compose.override.npm.yml.example` en **Additional paths** si necesitas personalizar puertos o PUID/PGID.
+
+**Desde CLI**:
+```bash
+cp docker-compose.override.npm.yml.example docker-compose.override.yml
+# Editar si necesitas personalizar
+docker compose up -d
+```
+
+#### 3. Configurar Proxy Host en NPM
 
 Accede a NPM (puerto 81) y crea un Proxy Host:
 
