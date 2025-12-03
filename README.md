@@ -117,7 +117,7 @@ networks:
 - **name**: `DOMAIN`
 - **value**: `heimdall.tudominio.com` (tu dominio real)
 
-O editar directamente en el YAML cambiando `${DOMAIN:-heimdall.tudominio.com}` por tu dominio.
+O editar directamente en el YAML cambiando `${DOMAIN}` por tu dominio.
 </details>
 
 <details>
