@@ -23,16 +23,15 @@ Heimdall es un dashboard elegante y minimalista para organizar todos tus servici
 ## Qué incluye este stack
 
 - **Servicio**: `heimdall` con la imagen `lscr.io/linuxserver/heimdall:latest`
-- **Puertos**:
-  - `8080`: HTTP (interfaz web)
-  - `8443`: HTTPS (certificado autofirmado)
 - **Volúmenes**:
   - `heimdall_config`: Configuración y base de datos
 - **Variables de entorno**:
   - `PUID=1000` / `PGID=1000`: Usuario/grupo para permisos de archivos
   - `TZ=Europe/Madrid`: Zona horaria
 
-**Nota**: La configuración base no incluye integración con proxy inverso. Usa los archivos override para conectar con Traefik o NPM.
+**⚠️ IMPORTANTE**: El `docker-compose.yml` base **NO publica puertos** por seguridad. Para acceder a Heimdall:
+- **Con proxy** (recomendado): Usa archivos override para Traefik o NPM
+- **Sin proxy** (acceso directo): Usa `docker-compose.override.standalone.yml.example`
 
 ## Pasos de despliegue
 
@@ -61,9 +60,10 @@ docker compose up -d
   - **Repository URL**: `https://git.ictiberia.com/groales/heimdall`
   - **Repository reference**: `refs/heads/main`
   - **Compose path**: `docker-compose.yml`
-  - **Additional paths** (opcional):
+  - **Additional paths** (según modo de acceso):
     - Para Traefik: `docker-compose.override.traefik.yml.example`
     - Para NPM: `docker-compose.override.npm.yml.example`
+    - Para acceso directo IP:puerto: `docker-compose.override.standalone.yml.example`
 - **Deploy the stack**
 
 **Nota**: Si usas **Additional paths**, no necesitas copiar el archivo a `.override.yml`. Portainer fusiona automáticamente los archivos especificados.
@@ -80,9 +80,13 @@ docker ps --filter name=heimdall
 
 ### 4. Acceder a la interfaz
 
-Abre tu navegador en:
-- **HTTP**: `http://IP-del-servidor:8080`
-- **HTTPS**: `https://IP-del-servidor:8443` (certificado autofirmado)
+Depende del override usado:
+
+- **Con Traefik**: `https://heimdall.tudominio.com` (ajustar dominio en override)
+- **Con NPM**: Configura Proxy Host primero (ver sección NPM), luego `https://heimdall.tudominio.com`
+- **Acceso directo**: `http://IP-del-servidor:8080` o `https://IP-del-servidor:8443`
+
+**Nota**: Si no usaste ningún override, el contenedor arranca pero no es accesible (sin puertos publicados).
 
 ## Configuración inicial
 
@@ -114,9 +118,27 @@ Para habilitar:
 
 ## Integración con Proxy Inverso
 
-Este repositorio incluye archivos override para facilitar la integración:
-- `docker-compose.override.traefik.yml.example` - Para Traefik
-- `docker-compose.override.npm.yml.example` - Para NGINX Proxy Manager
+Este repositorio incluye tres archivos override:
+- `docker-compose.override.traefik.yml.example` - Integración con Traefik
+- `docker-compose.override.npm.yml.example` - Integración con NGINX Proxy Manager
+- `docker-compose.override.standalone.yml.example` - Acceso directo sin proxy (publica puertos 8080/8443)
+
+**⚠️ Importante**: El `docker-compose.yml` base NO publica puertos. Debes usar uno de estos overrides para acceder a Heimdall.
+
+### Acceso Directo (sin proxy)
+
+**Desde Portainer (Git)**:
+- **Additional paths**: `docker-compose.override.standalone.yml.example`
+
+**Desde CLI**:
+```bash
+cp docker-compose.override.standalone.yml.example docker-compose.override.yml
+docker compose up -d
+```
+
+Acceso:
+- **HTTP**: `http://IP-del-servidor:8080`
+- **HTTPS**: `https://IP-del-servidor:8443` (certificado autofirmado)
 
 ### Con Traefik
 
@@ -193,13 +215,15 @@ En modo edición:
 
 ### Cambiar puertos
 
-Si los puertos 8080/8443 están ocupados, edita `docker-compose.yml`:
+**Si usas acceso directo** (override standalone), puedes personalizar los puertos editando `docker-compose.override.standalone.yml.example`:
 
 ```yaml
 ports:
   - "9080:80"    # HTTP en puerto 9080
   - "9443:443"   # HTTPS en puerto 9443
 ```
+
+**Si usas proxy** (Traefik o NPM), no necesitas puertos publicados - el acceso es via dominio.
 
 ### Variables de entorno
 
@@ -245,13 +269,15 @@ docker compose up -d
 
 ### Puerto ocupado
 
+**Solo aplica si usas acceso directo** (override standalone):
+
 ```bash
 # Ver qué proceso usa el puerto
 Get-NetTCPConnection -LocalPort 8080
 # o en Linux
 sudo netstat -tulpn | grep :8080
 
-# Cambiar puerto en docker-compose.yml
+# Cambiar puerto en docker-compose.override.standalone.yml.example
 ports:
   - "9080:80"
 ```
@@ -315,11 +341,11 @@ Heimdall mantiene la configuración entre actualizaciones (volumen persistente).
 
 ### Recomendaciones
 
-1. ✅ **Usar NPM con SSL** para acceso seguro por dominio
-2. ✅ **Restringir acceso** al puerto 8080 con firewall (si no usas proxy)
-3. ✅ **Backup periódico** del volumen `heimdall_config`
-4. ✅ **Actualizar regularmente** con `docker compose pull && docker compose up -d`
-5. ✅ **Usar contraseñas fuertes** si habilitas autenticación
+1. ✅ **Usar proxy con SSL** (Traefik o NPM) para acceso seguro por dominio
+2. ✅ **Evitar acceso directo** en producción - usa override standalone solo para testing
+3. ✅ **Restringir acceso** con Access Lists en NPM o middlewares en Traefik
+4. ✅ **Backup periódico** del volumen `heimdall_config`
+5. ✅ **Actualizar regularmente** con `docker compose pull && docker compose up -d`
 
 ### Proteger con Access List (NPM)
 
