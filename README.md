@@ -52,7 +52,11 @@ docker compose up -d
 
 ### Opción 2: Desplegar desde Portainer (Recomendado)
 
-#### 1. Desplegar stack de Heimdall
+Portainer ofrece dos métodos de despliegue:
+
+#### Método A: Git Repository
+
+Usa los archivos directamente del repositorio. Portainer fusiona automáticamente el base + override.
 
 **Stacks** → **Add stack**
 - **Name**: `heimdall`
@@ -66,7 +70,108 @@ docker compose up -d
     - Para acceso directo IP:puerto: `docker-compose.override.standalone.yml.example`
 - **Deploy the stack**
 
-**Nota**: Si usas **Additional paths**, no necesitas copiar el archivo a `.override.yml`. Portainer fusiona automáticamente los archivos especificados.
+#### Método B: Web Editor
+
+Copia y pega un docker-compose consolidado (base + override fusionados).
+
+**Stacks** → **Add stack**
+- **Name**: `heimdall`
+- **Build method**: **Web editor**
+- **Web editor**: Copiar y pegar uno de los siguientes compose completos:
+
+<details>
+<summary><b>📋 Docker Compose para Traefik</b> (click para expandir)</summary>
+
+```yaml
+services:
+  heimdall:
+    container_name: heimdall
+    image: lscr.io/linuxserver/heimdall:latest
+    restart: unless-stopped
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Madrid
+    volumes:
+      - heimdall_config:/config
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.heimdall.rule=Host(`heimdall.tudominio.com`)"
+      - "traefik.http.routers.heimdall.entrypoints=websecure"
+      - "traefik.http.routers.heimdall.tls=true"
+      - "traefik.http.routers.heimdall.tls.certresolver=letsencrypt"
+      - "traefik.http.services.heimdall.loadbalancer.server.port=80"
+      - "traefik.http.routers.heimdall.middlewares=security-headers@file"
+
+volumes:
+  heimdall_config:
+    name: heimdall_config
+
+networks:
+  proxy:
+    external: true
+```
+⚠️ **Importante**: Cambiar `heimdall.tudominio.com` por tu dominio real.
+</details>
+
+<details>
+<summary><b>📋 Docker Compose para NPM</b> (click para expandir)</summary>
+
+```yaml
+services:
+  heimdall:
+    container_name: heimdall
+    image: lscr.io/linuxserver/heimdall:latest
+    restart: unless-stopped
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Madrid
+    volumes:
+      - heimdall_config:/config
+    networks:
+      - proxy
+
+volumes:
+  heimdall_config:
+    name: heimdall_config
+
+networks:
+  proxy:
+    external: true
+```
+ℹ️ Después de desplegar, configura el Proxy Host en la UI de NPM (puerto 81).
+</details>
+
+<details>
+<summary><b>📋 Docker Compose Standalone</b> (click para expandir)</summary>
+
+```yaml
+services:
+  heimdall:
+    container_name: heimdall
+    image: lscr.io/linuxserver/heimdall:latest
+    restart: unless-stopped
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Madrid
+    volumes:
+      - heimdall_config:/config
+    ports:
+      - "8080:80"
+      - "8443:443"
+
+volumes:
+  heimdall_config:
+    name: heimdall_config
+```
+ℹ️ Acceso directo: `http://IP:8080` o `https://IP:8443`
+</details>
+
+- **Deploy the stack**
 
 #### 2. Verificar despliegue
 
