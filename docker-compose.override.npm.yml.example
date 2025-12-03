@@ -16,6 +16,7 @@
 
 services:
   heimdall:
+    ports: []  # Eliminar puertos, acceso solo via NPM
     networks:
       - proxy
 

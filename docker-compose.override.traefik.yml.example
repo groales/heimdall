@@ -15,6 +15,7 @@
 
 services:
   heimdall:
+    ports: []  # Eliminar puertos, acceso solo via Traefik
     networks:
       - proxy
     labels:
