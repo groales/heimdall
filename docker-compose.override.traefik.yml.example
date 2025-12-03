@@ -6,10 +6,13 @@
 #     - Repository URL: https://git.ictiberia.com/groales/heimdall
 #     - Compose path: docker-compose.yml
 #     - Additional paths: docker-compose.override.traefik.yml.example
+#     - Environment variables:
+#         DOMAIN=heimdall.tudominio.com
 #
 #   Desde CLI:
 #     1. Copia este archivo a docker-compose.override.yml
-#     2. Ajusta el dominio (heimdall.tudominio.com)
+#     2. Crea archivo .env con: DOMAIN=heimdall.tudominio.com
+#     3. docker compose up -d
 #
 # Docker Compose automáticamente fusiona docker-compose.yml + docker-compose.override.yml
 
@@ -22,7 +25,7 @@ services:
       - "traefik.enable=true"
       
       # Router HTTPS
-      - "traefik.http.routers.heimdall.rule=Host(`heimdall.tudominio.com`)"
+      - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN:-heimdall.tudominio.com}`)"
       - "traefik.http.routers.heimdall.entrypoints=websecure"
       - "traefik.http.routers.heimdall.tls=true"
       - "traefik.http.routers.heimdall.tls.certresolver=letsencrypt"
