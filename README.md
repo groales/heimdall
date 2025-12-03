@@ -98,7 +98,7 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN:-heimdall.tudominio.com}`)"
+      - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.heimdall.entrypoints=websecure"
       - "traefik.http.routers.heimdall.tls=true"
       - "traefik.http.routers.heimdall.tls.certresolver=letsencrypt"
