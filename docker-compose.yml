@@ -1,0 +1,25 @@
+services:
+  heimdall:
+    container_name: heimdall
+    image: lscr.io/linuxserver/heimdall:latest
+    restart: unless-stopped
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Madrid
+    volumes:
+      - heimdall_config:/config
+    ports:
+      - "8080:80"
+      - "8443:443"
+    networks:
+      - proxy
+
+volumes:
+  heimdall_config:
+    name: heimdall_config
+
+networks:
+  proxy:
+    name: proxy
+    driver: bridge
