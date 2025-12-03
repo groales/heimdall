@@ -18,16 +18,6 @@ services:
   heimdall:
     networks:
       - proxy
-    
-    # Descomenta y personaliza si necesitas cambiar puertos
-    # ports:
-    #   - "9080:80"
-    #   - "9443:443"
-    
-    # Descomenta y personaliza PUID/PGID según tu sistema
-    # environment:
-    #   PUID: 1001
-    #   PGID: 1001
 
 networks:
   proxy:
