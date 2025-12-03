@@ -28,10 +28,11 @@ Heimdall es un dashboard elegante y minimalista para organizar todos tus servici
   - `8443`: HTTPS (certificado autofirmado)
 - **Volúmenes**:
   - `heimdall_config`: Configuración y base de datos
-- **Red**: `proxy` (compartida con NPM/Traefik)
 - **Variables de entorno**:
   - `PUID=1000` / `PGID=1000`: Usuario/grupo para permisos de archivos
   - `TZ=Europe/Madrid`: Zona horaria
+
+**Nota**: La configuración base no incluye integración con proxy inverso. Usa los archivos override para conectar con Traefik o NPM.
 
 ## Pasos de despliegue
 
@@ -134,22 +135,20 @@ Accede a: `https://heimdall.tudominio.com`
 
 ### Con NGINX Proxy Manager
 
-#### 1. Conectar a red proxy
+#### 1. Desplegar con override
 
-La red `proxy` se crea automáticamente al desplegar el stack (compartida con NPM).
-
-#### 2. Desplegar (Opcional con override)
-
-**Desde Portainer**: Usar `docker-compose.override.npm.yml.example` en **Additional paths** si necesitas personalizar puertos o PUID/PGID.
+**Desde Portainer (Git)**:
+- **Additional paths**: `docker-compose.override.npm.yml.example`
 
 **Desde CLI**:
 ```bash
 cp docker-compose.override.npm.yml.example docker-compose.override.yml
-# Editar si necesitas personalizar
 docker compose up -d
 ```
 
-#### 3. Configurar Proxy Host en NPM
+Esto conecta Heimdall a la red `proxy` compartida con NPM.
+
+#### 2. Configurar Proxy Host en NPM
 
 Accede a NPM (puerto 81) y crea un Proxy Host:
 

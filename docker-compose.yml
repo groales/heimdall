@@ -12,14 +12,7 @@ services:
     ports:
       - "8080:80"
       - "8443:443"
-    networks:
-      - proxy
 
 volumes:
   heimdall_config:
     name: heimdall_config
-
-networks:
-  proxy:
-    name: proxy
-    driver: bridge
