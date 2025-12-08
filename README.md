@@ -197,6 +197,74 @@ Depende del override usado:
 
 **Nota**: Si no usaste ningún override, el contenedor arranca pero no es accesible (sin puertos publicados).
 
+---
+
+## Despliegue con Docker CLI
+
+Si prefieres trabajar desde la línea de comandos:
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://git.ictiberia.com/groales/heimdall.git
+cd heimdall
+```
+
+### 2. Elegir modo de despliegue
+
+#### Opción A: Traefik (recomendado para producción)
+
+```bash
+cp docker-compose.override.traefik.yml.example docker-compose.override.yml
+cp .env.example .env
+nano .env  # Editar: configurar DOMAIN_HOST
+```
+
+#### Opción B: Nginx Proxy Manager
+
+```bash
+cp docker-compose.override.npm.yml.example docker-compose.override.yml
+# No requiere .env
+```
+
+#### Opción C: Acceso Directo (standalone con puertos)
+
+```bash
+cp docker-compose.override.standalone.yml.example docker-compose.override.yml
+# No requiere .env
+```
+
+### 3. Iniciar el servicio
+
+```bash
+docker compose up -d
+```
+
+La inicialización tarda **5-10 segundos**.
+
+### 4. Verificar el despliegue
+
+```bash
+# Ver logs en tiempo real
+docker compose logs -f heimdall
+
+# Verificar contenedores activos
+docker compose ps
+
+# Ver archivos de configuración
+docker compose exec heimdall ls -lh /config/www/
+```
+
+**Acceso**:
+- Traefik: `https://<DOMAIN_HOST>` (ejemplo: `https://heimdall.example.com`)
+- NPM: Configurar en NPM apuntando a `heimdall` puerto `80`
+- Standalone: `http://IP-del-servidor:8080` o `https://IP-del-servidor:8443`
+
+**Primera configuración**:
+Heimdall no tiene login por defecto. La interfaz es directamente accesible.
+
+---
+
 ## Configuración inicial
 
 Al primer acceso, Heimdall muestra una interfaz vacía. Para añadir aplicaciones:
