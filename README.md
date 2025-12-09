@@ -100,7 +100,6 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.heimdall.entrypoints=websecure"
-      - "traefik.http.routers.heimdall.tls=true"
       - "traefik.http.routers.heimdall.tls.certresolver=letsencrypt"
       - "traefik.http.services.heimdall.loadbalancer.server.port=80"
       - "traefik.http.routers.heimdall.middlewares=security-headers@file"
