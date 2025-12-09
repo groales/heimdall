@@ -98,7 +98,7 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN_HOST}`)"
       - "traefik.http.routers.heimdall.entrypoints=websecure"
       - "traefik.http.routers.heimdall.tls.certresolver=letsencrypt"
       - "traefik.http.services.heimdall.loadbalancer.server.port=80"
@@ -113,10 +113,10 @@ networks:
     external: true
 ```
 ⚠️ **Importante**: En Portainer, añadir variable de entorno:
-- **name**: `DOMAIN`
+- **name**: `DOMAIN_HOST`
 - **value**: `heimdall.tudominio.com` (tu dominio real)
 
-O editar directamente en el YAML cambiando `${DOMAIN}` por tu dominio.
+O editar directamente en el YAML cambiando `${DOMAIN_HOST}` por tu dominio.
 </details>
 
 <details>
