@@ -33,54 +33,19 @@ Heimdall es un dashboard elegante y minimalista para organizar todos tus servici
 - **Con proxy** (recomendado): Usa archivos override para Traefik o NPM
 - **Sin proxy** (acceso directo): Usa `docker-compose.override.standalone.yml.example`
 
-## Pasos de despliegue
+## Despliegue con Docker Compose
 
-### Opción 1: Docker Compose (Línea de comandos)
-
-#### 1. Clonar el repositorio
+### 1. Crear Directorio y Archivos
 
 ```bash
-git clone https://git.ictiberia.com/groales/heimdall
+# Crear directorio
+mkdir heimdall
 cd heimdall
 ```
 
-#### 2. Levantar el stack
+### 2. Crear docker-compose.yml
 
-```bash
-docker compose up -d
-```
-
-### Opción 2: Desplegar desde Portainer (Recomendado)
-
-Portainer ofrece dos métodos de despliegue:
-
-#### Método A: Git Repository
-
-Usa los archivos directamente del repositorio. Portainer fusiona automáticamente el base + override.
-
-**Stacks** → **Add stack**
-- **Name**: `heimdall`
-- **Build method**: **Git Repository**
-  - **Repository URL**: `https://git.ictiberia.com/groales/heimdall`
-  - **Repository reference**: `refs/heads/main`
-  - **Compose path**: `docker-compose.yml`
-  - **Additional paths** (según modo de acceso):
-    - Para Traefik: `docker-compose.override.traefik.yml.example`
-    - Para NPM: `docker-compose.override.npm.yml.example`
-    - Para acceso directo IP:puerto: `docker-compose.override.standalone.yml.example`
-- **Deploy the stack**
-
-#### Método B: Web Editor
-
-Copia y pega un docker-compose consolidado (base + override fusionados).
-
-**Stacks** → **Add stack**
-- **Name**: `heimdall`
-- **Build method**: **Web editor**
-- **Web editor**: Copiar y pegar uno de los siguientes compose completos:
-
-<details>
-<summary><b>📋 Docker Compose para Traefik</b> (click para expandir)</summary>
+Crea el archivo `docker-compose.yml`:
 
 ```yaml
 services:
@@ -96,97 +61,94 @@ services:
       - heimdall_config:/config
     networks:
       - proxy
+
+volumes:
+  heimdall_config:
+    name: heimdall_config
+
+networks:
+  proxy:
+    external: true
+```
+
+### 3. (Opcional) Configurar Override para Acceso
+
+**⚠️ IMPORTANTE**: El `docker-compose.yml` base **NO publica puertos** por seguridad.
+
+#### Para Traefik
+
+Crea `docker-compose.override.yml`:
+
+```yaml
+services:
+  heimdall:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN_HOST}`)"
+      - "traefik.http.routers.heimdall.rule=Host(`heimdall.tudominio.com`)"
       - "traefik.http.routers.heimdall.entrypoints=websecure"
       - "traefik.http.routers.heimdall.tls.certresolver=letsencrypt"
       - "traefik.http.services.heimdall.loadbalancer.server.port=80"
       - "traefik.http.routers.heimdall.middlewares=security-headers@file"
-
-volumes:
-  heimdall_config:
-    name: heimdall_config
-
-networks:
-  proxy:
-    external: true
 ```
-⚠️ **Importante**: En Portainer, añadir variable de entorno:
-- **name**: `DOMAIN_HOST`
-- **value**: `heimdall.tudominio.com` (tu dominio real)
 
-O editar directamente en el YAML cambiando `${DOMAIN_HOST}` por tu dominio.
-</details>
+#### Para NPM
 
-<details>
-<summary><b>📋 Docker Compose para NPM</b> (click para expandir)</summary>
+No requiere override adicional. Configura el Proxy Host en la UI de NPM apuntando a `heimdall` puerto `80`.
+
+#### Para Acceso Directo (Standalone)
+
+Crea `docker-compose.override.yml`:
 
 ```yaml
 services:
   heimdall:
-    container_name: heimdall
-    image: lscr.io/linuxserver/heimdall:latest
-    restart: unless-stopped
-    environment:
-      PUID: 1000
-      PGID: 1000
-      TZ: Europe/Madrid
-    volumes:
-      - heimdall_config:/config
-    networks:
-      - proxy
-
-volumes:
-  heimdall_config:
-    name: heimdall_config
-
-networks:
-  proxy:
-    external: true
-```
-ℹ️ Después de desplegar, configura el Proxy Host en la UI de NPM (puerto 81).
-</details>
-
-<details>
-<summary><b>📋 Docker Compose Standalone</b> (click para expandir)</summary>
-
-```yaml
-services:
-  heimdall:
-    container_name: heimdall
-    image: lscr.io/linuxserver/heimdall:latest
-    restart: unless-stopped
-    environment:
-      PUID: 1000
-      PGID: 1000
-      TZ: Europe/Madrid
-    volumes:
-      - heimdall_config:/config
     ports:
       - "8080:80"
       - "8443:443"
-
-volumes:
-  heimdall_config:
-    name: heimdall_config
 ```
-ℹ️ Acceso directo: `http://IP:8080` o `https://IP:8443`
-</details>
 
-- **Deploy the stack**
-
-#### 2. Verificar despliegue
-
-**Stacks** → `heimdall` → Ver logs del contenedor
-
-### 3. Verificar el estado
+### 4. Desplegar
 
 ```bash
-docker ps --filter name=heimdall
+# Crear red proxy si no existe
+docker network create proxy
+
+# Iniciar servicios
+docker compose up -d
+
+# Ver logs
+docker compose logs -f heimdall
 ```
 
-### 4. Acceder a la interfaz
+---
+
+## Método Alternativo: Clonar desde Git
+
+Si prefieres usar Git para mantener la configuración actualizada:
+
+```bash
+# Clonar repositorio
+git clone https://git.ictiberia.com/groales/heimdall.git
+cd heimdall
+
+# Para Traefik
+cp docker-compose.override.traefik.yml.example docker-compose.override.yml
+# Editar override para configurar tu dominio
+
+# Para NPM
+cp docker-compose.override.npm.yml.example docker-compose.override.yml
+
+# Para acceso directo
+cp docker-compose.override.standalone.yml.example docker-compose.override.yml
+
+# Desplegar
+docker network create proxy
+docker compose up -d
+```
+
+---
+
+## Acceder a la Interfaz
 
 Depende del override usado:
 
@@ -198,73 +160,7 @@ Depende del override usado:
 
 ---
 
-## Despliegue con Docker CLI
-
-Si prefieres trabajar desde la línea de comandos:
-
-### 1. Clonar el repositorio
-
-```bash
-git clone https://git.ictiberia.com/groales/heimdall.git
-cd heimdall
-```
-
-### 2. Elegir modo de despliegue
-
-#### Opción A: Traefik (recomendado para producción)
-
-```bash
-cp docker-compose.override.traefik.yml.example docker-compose.override.yml
-cp .env.example .env
-nano .env  # Editar: configurar DOMAIN_HOST
-```
-
-#### Opción B: Nginx Proxy Manager
-
-```bash
-cp docker-compose.override.npm.yml.example docker-compose.override.yml
-# No requiere .env
-```
-
-#### Opción C: Acceso Directo (standalone con puertos)
-
-```bash
-cp docker-compose.override.standalone.yml.example docker-compose.override.yml
-# No requiere .env
-```
-
-### 3. Iniciar el servicio
-
-```bash
-docker compose up -d
-```
-
-La inicialización tarda **5-10 segundos**.
-
-### 4. Verificar el despliegue
-
-```bash
-# Ver logs en tiempo real
-docker compose logs -f heimdall
-
-# Verificar contenedores activos
-docker compose ps
-
-# Ver archivos de configuración
-docker compose exec heimdall ls -lh /config/www/
-```
-
-**Acceso**:
-- Traefik: `https://<DOMAIN_HOST>` (ejemplo: `https://heimdall.example.com`)
-- NPM: Configurar en NPM apuntando a `heimdall` puerto `80`
-- Standalone: `http://IP-del-servidor:8080` o `https://IP-del-servidor:8443`
-
-**Primera configuración**:
-Heimdall no tiene login por defecto. La interfaz es directamente accesible.
-
----
-
-## Configuración inicial
+## Configuración Inicial
 
 Al primer acceso, Heimdall muestra una interfaz vacía. Para añadir aplicaciones:
 
@@ -274,7 +170,7 @@ Al primer acceso, Heimdall muestra una interfaz vacía. Para añadir aplicacione
    - **Application name**: Nombre del servicio
    - **Colour**: Color del icono
    - **Icon**: Buscar icono o usar URL personalizada
-   - **URL**: Dirección completa (ej: `https://portainer.tudominio.com`)
+   - **URL**: Dirección completa (ej: `https://jellyfin.tudominio.com`)
    - **Description**: Descripción opcional
 4. **Save**
 
@@ -303,9 +199,6 @@ Este repositorio incluye tres archivos override:
 
 ### Acceso Directo (sin proxy)
 
-**Desde Portainer (Git)**:
-- **Additional paths**: `docker-compose.override.standalone.yml.example`
-
 **Desde CLI**:
 ```bash
 cp docker-compose.override.standalone.yml.example docker-compose.override.yml
@@ -317,10 +210,6 @@ Acceso:
 - **HTTPS**: `https://IP-del-servidor:8443` (certificado autofirmado)
 
 ### Con Traefik
-
-**Desde Portainer (Git)**:
-- **Additional paths**: `docker-compose.override.traefik.yml.example`
-- Editar dominio en el archivo antes de desplegar, o después desde Stack Editor
 
 **Desde CLI**:
 ```bash
@@ -334,9 +223,6 @@ Accede a: `https://heimdall.tudominio.com`
 ### Con NGINX Proxy Manager
 
 #### 1. Desplegar con override
-
-**Desde Portainer (Git)**:
-- **Additional paths**: `docker-compose.override.npm.yml.example`
 
 **Desde CLI**:
 ```bash
