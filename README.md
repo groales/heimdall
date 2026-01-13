@@ -59,16 +59,12 @@ services:
       TZ: Europe/Madrid
     volumes:
       - heimdall_config:/config
-    networks:
-      - proxy
 
-volumes:
-  heimdall_config:
-    name: heimdall_config
-
+# añadir estas líneas al final del archivo para proxy inverso 
 networks:
-  proxy:
+  default:
     external: true
+    name: proxy
 ```
 
 ### 3. (Opcional) Configurar Override para Acceso
