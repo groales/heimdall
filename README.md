@@ -60,6 +60,10 @@ services:
     volumes:
       - heimdall_config:/config
 
+volumes:
+  heimdall_config:
+    name: heimdall_config
+    
 # añadir estas líneas al final del archivo para proxy inverso 
 networks:
   default:
