@@ -41,6 +41,7 @@ mkdir -p /NFS_EXPORT_BASE/heimdall/config
 - Edita host en `05-ingress.yaml`:
   - `heimdall.example.com` -> tu dominio real
 - `ingressClassName` en `05-ingress.yaml` está configurado como `public` (clase por defecto detectada en tu MicroK8s)
+- `cert-manager.io/cluster-issuer` está configurado como `letsencrypt-prod` (usa `letsencrypt-staging` para pruebas)
 
 ## Despliegue
 

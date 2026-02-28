@@ -3,8 +3,14 @@ kind: Ingress
 metadata:
   name: heimdall
   namespace: heimdall
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: public
+  tls:
+    - hosts:
+        - heimdall.example.com
+      secretName: heimdall-tls
   rules:
     - host: heimdall.example.com
       http:
