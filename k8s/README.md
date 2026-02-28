@@ -2,7 +2,7 @@
 
 Base de despliegue para tu clúster MicroK8s con almacenamiento NFS:
 
-- NFS: `192.168.2.3:/volume1/k8s`
+- NFS: `NFS_SERVER_IP:/NFS_EXPORT_BASE`
 
 ## Qué despliega
 
@@ -33,7 +33,7 @@ microk8s enable dns ingress metrics-server
 
 ```bash
 # En servidor NFS
-mkdir -p /volume1/k8s/heimdall/config
+mkdir -p /NFS_EXPORT_BASE/heimdall/config
 ```
 
 ## Personalización rápida
