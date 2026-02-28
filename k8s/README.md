@@ -1,4 +1,4 @@
-# Heimdall en MicroK8s (NFS + Cloudflare)
+# Heimdall en MicroK8s (NFS)
 
 Base de despliegue para tu clúster MicroK8s de 3 nodos:
 
@@ -13,7 +13,6 @@ Base de despliegue para tu clúster MicroK8s de 3 nodos:
 - Persistencia en NFS (`/config`)
 - Service + Ingress interno
 - PodDisruptionBudget
-- Opción de publicación con Cloudflare Tunnel
 
 ## Archivos
 
@@ -24,8 +23,6 @@ Base de despliegue para tu clúster MicroK8s de 3 nodos:
 - `04-service.yaml`
 - `05-ingress.yaml`
 - `06-pdb.yaml`
-- `07-cloudflared-secret.example.yaml`
-- `08-cloudflared-deployment.yaml`
 
 ## Requisitos previos
 
@@ -42,8 +39,6 @@ microk8s enable dns ingress metrics-server
 mkdir -p /volume1/k8s/heimdall/config
 ```
 
-3. Si usas Cloudflare Tunnel, crear el túnel en Cloudflare Zero Trust y obtener `TUNNEL_TOKEN`.
-
 ## Personalización rápida
 
 - Edita host en `05-ingress.yaml`:
@@ -51,7 +46,6 @@ mkdir -p /volume1/k8s/heimdall/config
 - Verifica `ingressClassName` en `05-ingress.yaml`:
   - si usas NGINX suele ser `nginx`
   - si usas Traefik, usa el nombre real de tu clase
-- Edita `07-cloudflared-secret.example.yaml` y pon tu token
 
 ## Despliegue
 
@@ -65,13 +59,6 @@ kubectl apply -f 05-ingress.yaml
 kubectl apply -f 06-pdb.yaml
 ```
 
-### Publicar con Cloudflare Tunnel (opcional)
-
-```bash
-kubectl apply -f 07-cloudflared-secret.example.yaml
-kubectl apply -f 08-cloudflared-deployment.yaml
-```
-
 ## Comprobaciones
 
 ```bash
@@ -79,11 +66,9 @@ kubectl -n heimdall get pods
 kubectl -n heimdall get pvc
 kubectl -n heimdall get ingress
 kubectl -n heimdall logs deploy/heimdall --tail=100
-kubectl -n heimdall logs deploy/cloudflared --tail=100
 ```
 
 ## Recomendaciones
 
 - Mantén Heimdall en `replicas: 1` al principio.
 - Cuando valides estabilidad, puedes probar `replicas: 2` con el mismo PVC RWX.
-- Protege acceso público con Cloudflare Access (MFA/SSO).
