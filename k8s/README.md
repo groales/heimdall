@@ -1,10 +1,7 @@
 # Heimdall en MicroK8s (NFS)
 
-Base de despliegue para tu clúster MicroK8s de 3 nodos:
+Base de despliegue para tu clúster MicroK8s con almacenamiento NFS:
 
-- `k8s1` `192.168.3.250`
-- `k8s2` `192.168.3.251`
-- `k8s3` `192.168.3.252`
 - NFS: `192.168.2.3:/volume1/k8s`
 
 ## Qué despliega
