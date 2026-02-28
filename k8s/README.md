@@ -40,9 +40,7 @@ mkdir -p /NFS_EXPORT_BASE/heimdall/config
 
 - Edita host en `05-ingress.yaml`:
   - `heimdall.example.com` -> tu dominio real
-- Verifica `ingressClassName` en `05-ingress.yaml`:
-  - si usas NGINX suele ser `nginx`
-  - si usas Traefik, usa el nombre real de tu clase
+- `ingressClassName` en `05-ingress.yaml` está configurado como `public` (clase por defecto detectada en tu MicroK8s)
 
 ## Despliegue
 
