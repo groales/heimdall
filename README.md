@@ -254,6 +254,10 @@ Accede a NPM (puerto 81) y crea un Proxy Host:
 
 **Save** y accede a: `https://heimdall.tudominio.com` 🎉
 
+## Despliegue en Kubernetes (MicroK8s)
+
+Si vas a desplegar Heimdall en tu clúster, tienes una base lista en [k8s/README.md](k8s/README.md) con NFS y Cloudflare Tunnel.
+
 ## Personalización
 
 ### Cambiar tema
