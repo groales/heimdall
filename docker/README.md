@@ -23,140 +23,50 @@ Heimdall es un dashboard elegante y minimalista para organizar todos tus servici
 ## Qué incluye este stack
 
 - **Servicio**: `heimdall` con la imagen `lscr.io/linuxserver/heimdall:latest`
+- **Puertos publicados**: 8080 (HTTP) y 8443 (HTTPS)
+- **Red Docker**: conectado a red externa `proxy` para integración con proxies inversos
 - **Volúmenes**:
-  - `heimdall_config`: Configuración y base de datos
+  - `heimdall_config`: Configuración y base de datos (persistencia)
 - **Variables de entorno**:
   - `PUID=1000` / `PGID=1000`: Usuario/grupo para permisos de archivos
   - `TZ=Europe/Madrid`: Zona horaria
+  - `ALLOW_INTERNAL_REQUESTS=false`: Seguridad (bloquea solicitudes internas)
 
-**⚠️ IMPORTANTE**: El `docker-compose.yml` base **NO publica puertos** por seguridad. Para acceder a Heimdall:
-- **Con proxy** (recomendado): Usa archivos override para Traefik o NPM
-- **Sin proxy** (acceso directo): Usa `docker-compose.override.standalone.yml.example`
+**Despliegue listo para usar**: El compose funciona directamente sin necesidad de overrides. Los puertos 8080/8443 están disponibles inmediatamente.
 
-## Despliegue con Docker Compose
+## Despliegue rápido
 
-### 1. Crear Directorio y Archivos
+### Opción 1: Clonar el repositorio
 
 ```bash
-# Crear directorio
-mkdir heimdall
+git clone https://git.ictiberia.com/groales/heimdall.git
 cd heimdall/docker
-```
 
-### 2. Crear docker-compose.yml
-
-Crea el archivo `docker-compose.yml`:
-
-```yaml
-services:
-  heimdall:
-    container_name: heimdall
-    image: lscr.io/linuxserver/heimdall:latest
-    restart: unless-stopped
-    environment:
-      PUID: 1000
-      PGID: 1000
-      TZ: Europe/Madrid
-    volumes:
-      - heimdall_config:/config
-
-volumes:
-  heimdall_config:
-    name: heimdall_config
-    
-# añadir estas líneas al final del archivo para proxy inverso 
-networks:
-  default:
-    external: true
-    name: proxy
-```
-
-### 3. (Opcional) Configurar Override para Acceso
-
-**⚠️ IMPORTANTE**: El `docker-compose.yml` base **NO publica puertos** por seguridad.
-
-#### Para Traefik
-
-Crea `docker-compose.override.yml`:
-
-```yaml
-services:
-  heimdall:
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.heimdall.rule=Host(`heimdall.tudominio.com`)"
-      - "traefik.http.routers.heimdall.entrypoints=websecure"
-      - "traefik.http.routers.heimdall.tls.certresolver=letsencrypt"
-      - "traefik.http.services.heimdall.loadbalancer.server.port=80"
-      - "traefik.http.routers.heimdall.middlewares=security-headers@file"
-```
-
-#### Para NPM
-
-No requiere override adicional. Configura el Proxy Host en la UI de NPM apuntando a `heimdall` puerto `80`.
-
-#### Para Acceso Directo (Standalone)
-
-Crea `docker-compose.override.yml`:
-
-```yaml
-services:
-  heimdall:
-    ports:
-      - "8080:80"
-      - "8443:443"
-```
-
-### 4. Desplegar
-
-```bash
-# Crear red proxy si no existe
+# Crear la red proxy
 docker network create proxy
 
-# Iniciar servicios
+# Desplegar
 docker compose up -d
 
 # Ver logs
 docker compose logs -f heimdall
 ```
 
----
-
-## Método Alternativo: Clonar desde Git
-
-Si prefieres usar Git para mantener la configuración actualizada:
+### Opción 2: Crear manualmente
 
 ```bash
-# Clonar repositorio
-git clone https://git.ictiberia.com/groales/heimdall.git
+mkdir -p heimdall/docker
 cd heimdall/docker
-
-# Para Traefik
-cp docker-compose.override.traefik.yml.example docker-compose.override.yml
-# Editar override para configurar tu dominio
-
-# Para NPM
-cp docker-compose.override.npm.yml.example docker-compose.override.yml
-
-# Para acceso directo
-cp docker-compose.override.standalone.yml.example docker-compose.override.yml
-
-# Desplegar
-docker network create proxy
-docker compose up -d
 ```
 
----
+Copia el contenido del `docker-compose.yml` de este repositorio (ver más arriba). El compose está completamente configurado y listo para usar.
 
-## Acceder a la Interfaz
+## Acceso a Heimdall
 
-Depende del override usado:
+Una vez desplegado, accede directamente:
 
-- **Con Traefik**: `https://heimdall.tudominio.com` (ajustar dominio en override)
-- **Con NPM**: Configura Proxy Host primero (ver sección NPM), luego `https://heimdall.tudominio.com`
-- **Acceso directo**: `http://IP-del-servidor:8080` o `https://IP-del-servidor:8443`
-
-**Nota**: Si no usaste ningún override, el contenedor arranca pero no es accesible (sin puertos publicados).
+- **HTTP**: `http://IP-del-servidor:8080`
+- **HTTPS**: `https://IP-del-servidor:8443` (certificado autofirmado)
 
 ---
 
@@ -190,69 +100,32 @@ Para habilitar:
 
 ## Integración con Proxy Inverso
 
-Este repositorio incluye tres archivos override:
-- `docker-compose.override.traefik.yml.example` - Integración con Traefik
-- `docker-compose.override.npm.yml.example` - Integración con NGINX Proxy Manager
-- `docker-compose.override.standalone.yml.example` - Acceso directo sin proxy (publica puertos 8080/8443)
+El compose se conecta automáticamente a la red `proxy` externa. Para usar con proxies inversos:
 
-**⚠️ Importante**: El `docker-compose.yml` base NO publica puertos. Debes usar uno de estos overrides para acceder a Heimdall.
+### Con NGINX Proxy Manager (NPM)
 
-### Acceso Directo (sin proxy)
-
-**Desde CLI**:
-```bash
-cp docker-compose.override.standalone.yml.example docker-compose.override.yml
-docker compose up -d
-```
-
-Acceso:
-- **HTTP**: `http://IP-del-servidor:8080`
-- **HTTPS**: `https://IP-del-servidor:8443` (certificado autofirmado)
+Crea un Proxy Host en NPM:
+- **Domain Names**: `heimdall.tudominio.com`
+- **Scheme**: `http`
+- **Forward Hostname**: `heimdall` (nombre del contenedor)
+- **Forward Port**: `80`
+- **SSL**: Solicita certificado Let's Encrypt
 
 ### Con Traefik
 
-**Desde CLI**:
+Usaré override `docker-compose.override.traefik.yml.example` para añadir labels de Traefik:
+
 ```bash
 cp docker-compose.override.traefik.yml.example docker-compose.override.yml
-# Editar dominio en docker-compose.override.yml
-docker compose up -d
 ```
 
-Accede a: `https://heimdall.tudominio.com`
+Edita el dominio en el override y aplica:
 
-### Con NGINX Proxy Manager
-
-#### 1. Desplegar con override
-
-**Desde CLI**:
 ```bash
-cp docker-compose.override.npm.yml.example docker-compose.override.yml
 docker compose up -d
 ```
 
-Esto conecta Heimdall a la red `proxy` compartida con NPM.
 
-#### 2. Configurar Proxy Host en NPM
-
-Accede a NPM (puerto 81) y crea un Proxy Host:
-
-**Pestaña Details**:
-- **Domain Names**: `heimdall.tudominio.com`
-- **Scheme**: `http`
-- **Forward Hostname / IP**: `heimdall` (nombre del contenedor)
-- **Forward Port**: `80`
-- **Cache Assets**: ✅
-- **Block Common Exploits**: ✅
-- **Websockets Support**: ❌
-
-**Pestaña SSL**:
-- ✅ **Request a new SSL Certificate**
-- ✅ **Force SSL**
-- ✅ **HTTP/2 Support**
-- Email: `tu@email.com`
-- ✅ **I Agree to Let's Encrypt ToS**
-
-**Save** y accede a: `https://heimdall.tudominio.com` 🎉
 
 ## Despliegue en Kubernetes (MicroK8s)
 
@@ -281,7 +154,7 @@ En modo edición:
 
 ### Cambiar puertos
 
-**Si usas acceso directo** (override standalone), puedes personalizar los puertos editando `docker-compose.override.standalone.yml.example`:
+Si necesitas acceder por puertos diferentes, edita el `docker-compose.yml`:
 
 ```yaml
 ports:
@@ -289,7 +162,11 @@ ports:
   - "9443:443"   # HTTPS en puerto 9443
 ```
 
-**Si usas proxy** (Traefik o NPM), no necesitas puertos publicados - el acceso es via dominio.
+Luego reaplica:
+
+```bash
+docker compose up -d
+```
 
 ### Variables de entorno
 
@@ -335,17 +212,18 @@ docker compose up -d
 
 ### Puerto ocupado
 
-**Solo aplica si usas acceso directo** (override standalone):
-
 ```bash
 # Ver qué proceso usa el puerto
 Get-NetTCPConnection -LocalPort 8080
 # o en Linux
 sudo netstat -tulpn | grep :8080
 
-# Cambiar puerto en docker-compose.override.standalone.yml.example
+# Cambiar puerto en docker-compose.yml
 ports:
   - "9080:80"
+
+# Reaplica
+docker compose up -d
 ```
 
 ### Contenedor no arranca
@@ -407,11 +285,12 @@ Heimdall mantiene la configuración entre actualizaciones (volumen persistente).
 
 ### Recomendaciones
 
-1. ✅ **Usar proxy con SSL** (Traefik o NPM) para acceso seguro por dominio
-2. ✅ **Evitar acceso directo** en producción - usa override standalone solo para testing
-3. ✅ **Restringir acceso** con Access Lists en NPM o middlewares en Traefik
+1. ✅ **Usar proxy con SSL** (Traefik o NPM) en producción para acceso seguro por dominio
+2. ✅ **Restringir acceso** por IP en el firewall si publicas puertos directamente
+3. ✅ **Usar Access Lists en NPM** o middlewares en Traefik para control de acceso
 4. ✅ **Backup periódico** del volumen `heimdall_config`
 5. ✅ **Actualizar regularmente** con `docker compose pull && docker compose up -d`
+6. ✅ **Variable `ALLOW_INTERNAL_REQUESTS=false`** bloquea solicitudes sospechosas
 
 ### Proteger con Access List (NPM)
 
