@@ -13,6 +13,7 @@ Base de despliegue para tu clúster MicroK8s con almacenamiento NFS:
 
 ## Archivos
 
+- `00-storageclass.yaml` - StorageClass NFS (debe aplicarse primero)
 - `00-namespace.yaml`
 - `01-pv-pvc.yaml`
 - `02-configmap.yaml`
@@ -46,6 +47,10 @@ mkdir -p /NFS_EXPORT_BASE/heimdall/config
 ## Despliegue
 
 ```bash
+# 1. StorageClass primero (requerido una sola vez por cluster)
+kubectl apply -f 00-storageclass.yaml
+
+# 2. Reste del stack
 kubectl apply -f 00-namespace.yaml
 kubectl apply -f 01-pv-pvc.yaml
 kubectl apply -f 02-configmap.yaml
@@ -53,6 +58,9 @@ kubectl apply -f 03-deployment.yaml
 kubectl apply -f 04-service.yaml
 kubectl apply -f 05-ingress.yaml
 kubectl apply -f 06-pdb.yaml
+
+# O en una sola aplicación (después de crear StorageClass)
+kubectl apply -f .
 ```
 
 ## Comprobaciones
