@@ -32,5 +32,4 @@ kubectl apply -f 02-configmap.yaml
 kubectl apply -f 03-deployment.yaml
 kubectl apply -f 04-service.yaml
 kubectl apply -f 05-ingress.yaml
-kubectl apply -f 06-pdb.yaml
 ```

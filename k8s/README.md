@@ -9,7 +9,6 @@ Base de despliegue para tu clúster MicroK8s con almacenamiento NFS:
 - Heimdall con 1 réplica (recomendado para inicio)
 - Persistencia en NFS (`/config`)
 - Service + Ingress interno
-- PodDisruptionBudget
 
 ## Storage
 
@@ -39,7 +38,6 @@ kubectl apply -f storageclass-nfs.yaml
 - `03-deployment.yaml`
 - `04-service.yaml`
 - `05-ingress.yaml`
-- `06-pdb.yaml`
 
 ## Requisitos previos
 
@@ -73,7 +71,6 @@ kubectl apply -f 02-configmap.yaml
 kubectl apply -f 03-deployment.yaml
 kubectl apply -f 04-service.yaml
 kubectl apply -f 05-ingress.yaml
-kubectl apply -f 06-pdb.yaml
 
 # O en una sola aplicación
 kubectl apply -f .
