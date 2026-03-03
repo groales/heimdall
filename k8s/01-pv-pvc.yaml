@@ -19,6 +19,7 @@ metadata:
   name: heimdall-config
   namespace: heimdall
 spec:
+  volumeName: heimdall-config-pv
   accessModes:
     - ReadWriteMany
   storageClassName: nfs
