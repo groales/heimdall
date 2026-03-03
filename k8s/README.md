@@ -11,9 +11,29 @@ Base de despliegue para tu clúster MicroK8s con almacenamiento NFS:
 - Service + Ingress interno
 - PodDisruptionBudget
 
+## Storage
+
+Este despliegue usa el **StorageClass genérico `nfs`** para el cluster. Si no está creado, aplicar:
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs
+provisioner: kubernetes.io/nfs
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+```
+
+Guardar como `storageclass-nfs.yaml` y aplicar:
+
+```bash
+kubectl apply -f storageclass-nfs.yaml
+```
+
 ## Archivos
 
-- `00-storageclass.yaml` - StorageClass NFS (debe aplicarse primero)
+- `00-storageclass.yaml` - Ejemplo para crear el StorageClass `nfs` si no existe
 - `00-namespace.yaml`
 - `01-pv-pvc.yaml`
 - `02-configmap.yaml`
@@ -47,7 +67,7 @@ mkdir -p /NFS_EXPORT_BASE/heimdall/config
 ## Despliegue
 
 ```bash
-# 1. StorageClass primero (requerido una sola vez por cluster)
+# 1. (Opcional) Crear StorageClass nfs si no existe en el cluster
 kubectl apply -f 00-storageclass.yaml
 
 # 2. Reste del stack
