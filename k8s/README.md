@@ -33,7 +33,6 @@ kubectl apply -f storageclass-nfs.yaml
 
 ## Archivos
 
-- `00-storageclass.yaml` - Ejemplo para crear el StorageClass `nfs` si no existe
 - `00-namespace.yaml`
 - `01-pv-pvc.yaml`
 - `02-configmap.yaml`
@@ -67,10 +66,7 @@ mkdir -p /NFS_EXPORT_BASE/heimdall/config
 ## Despliegue
 
 ```bash
-# 1. (Opcional) Crear StorageClass nfs si no existe en el cluster
-kubectl apply -f 00-storageclass.yaml
-
-# 2. Reste del stack
+# 1. Despliegue del stack
 kubectl apply -f 00-namespace.yaml
 kubectl apply -f 01-pv-pvc.yaml
 kubectl apply -f 02-configmap.yaml
@@ -79,7 +75,7 @@ kubectl apply -f 04-service.yaml
 kubectl apply -f 05-ingress.yaml
 kubectl apply -f 06-pdb.yaml
 
-# O en una sola aplicación (después de crear StorageClass)
+# O en una sola aplicación
 kubectl apply -f .
 ```
 

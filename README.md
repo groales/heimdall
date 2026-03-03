@@ -26,8 +26,6 @@ docker compose up -d
 
 ```bash
 cd k8s
-# opcional (si no existe el StorageClass nfs en el cluster)
-kubectl apply -f 00-storageclass.yaml
 kubectl apply -f 00-namespace.yaml
 kubectl apply -f 01-pv-pvc.yaml
 kubectl apply -f 02-configmap.yaml
