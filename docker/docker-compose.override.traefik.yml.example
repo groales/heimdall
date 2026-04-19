@@ -1,8 +1,0 @@
-services:
-  heimdall:
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.heimdall.rule=Host(`${DOMAIN_HOST}`)
-      - traefik.http.routers.heimdall.entrypoints=websecure
-      - traefik.http.routers.heimdall.tls.certresolver=letsencrypt
-      - traefik.http.services.heimdall.loadbalancer.server.port=80

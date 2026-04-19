@@ -14,13 +14,13 @@ Dashboard de aplicaciones elegante y minimalista.
 
 - Docker y Docker Compose
 - Puertos 8080/8443 disponibles (o personalizables)
-- Red Docker `proxy` creada
+- Red Docker `proxy` creada si vas a usar un proxy inverso genérico
 
 ## Despliegue rápido
 
 ```bash
 # Clonar repositorio
-git clone https://git.ictiberia.com/groales/heimdall.git
+git clone https://github.com/groales/heimdall.git
 cd heimdall/docker
 
 # Crear red proxy
@@ -37,50 +37,16 @@ docker compose up -d
 
 ## Configuración del compose
 
-El `docker-compose.yml` incluye:
+El [heimdall/docker/docker-compose.yml](heimdall/docker/docker-compose.yml) incluye:
 
-- **Imagen**: `lscr.io/linuxserver/heimdall:latest`
-- **Puertos**: 8080→80, 8443→443
-- **Red**: conectado a red externa `proxy`
-- **Volumen**: `heimdall_config` persistente
-- **Variables**:
+- Imagen: `lscr.io/linuxserver/heimdall:latest`
+- Puertos publicados: 8080 → 80 y 8443 → 443
+- Volumen persistente: `./config:/config`
+- Red externa `proxy` para integrarlo con un proxy inverso genérico
+- Variables:
   - `PUID=1000` / `PGID=1000`
   - `TZ=Europe/Madrid`
   - `ALLOW_INTERNAL_REQUESTS=false`
-
-## Integración con Traefik
-
-Para acceso por dominio con SSL automático:
-
-```bash
-# Crear .env con tu dominio
-echo "DOMAIN_HOST=heimdall.tudominio.com" > .env
-
-# Copiar override
-cp docker-compose.override.traefik.yml.example docker-compose.override.yml
-
-# Aplicar
-docker compose up -d
-```
-
-Acceso: `https://heimdall.tudominio.com`
-
-### Personalizar dominio
-
-Edita `.env`:
-
-```env
-DOMAIN_HOST=heimdall.midominio.com
-```
-
-O edita directamente `docker-compose.override.yml`:
-
-```yaml
-services:
-  heimdall:
-    labels:
-      - traefik.http.routers.heimdall.rule=Host(`heimdall.midominio.com`)
-```
 
 ## Personalización
 
@@ -124,7 +90,7 @@ id
 3. **Add Application**:
    - Application name: `Jellyfin`
    - Icon: `jellyfin`
-   - URL: `https://jellyfin.tudominio.com`
+   - URL: la URL real de tu servicio
    - Description: `Servidor multimedia`
 4. **Save**
 
@@ -214,6 +180,8 @@ docker network create proxy
 docker compose up -d
 ```
 
+> Si no necesitas proxy inverso, puedes eliminar el bloque `networks` del compose y acceder solo por los puertos publicados.
+
 ## Recursos
 
 - [Documentación oficial](https://docs.linuxserver.io/images/docker-heimdall)
@@ -222,4 +190,4 @@ docker compose up -d
 
 ---
 
-**Repositorio**: [groales/heimdall](https://git.ictiberia.com/groales/heimdall)
+**Repositorio**: https://github.com/groales/heimdall

@@ -10,15 +10,11 @@ services:
       - ALLOW_INTERNAL_REQUESTS=false #optional
 
     volumes:
-      - heimdall_config:/config
+      - ./config:/config
     # añadir estas líneas para publicar los puertos al host
     ports:
       - 8080:80
       - 8443:443
-
-volumes:
-  heimdall_config:
-    name: heimdall_config
     
 # añadir estas líneas al final del archivo para proxy inverso 
 networks:
