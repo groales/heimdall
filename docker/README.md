@@ -37,7 +37,7 @@ docker compose up -d
 
 ## Configuración del compose
 
-El [heimdall/docker/docker-compose.yml](heimdall/docker/docker-compose.yml) incluye:
+El [heimdall/docker/compose.yaml](heimdall/docker/compose.yaml) incluye:
 
 - Imagen: `lscr.io/linuxserver/heimdall:latest`
 - Puertos publicados: 8080 → 80 y 8443 → 443
@@ -52,7 +52,7 @@ El [heimdall/docker/docker-compose.yml](heimdall/docker/docker-compose.yml) incl
 
 ### Cambiar puertos
 
-Edita `docker-compose.yml`:
+Edita `compose.yaml`:
 
 ```yaml
 ports:
@@ -68,7 +68,7 @@ docker compose up -d
 
 ### Ajustar zona horaria y permisos
 
-Edita variables en `docker-compose.yml`:
+Edita variables en `compose.yaml`:
 
 ```yaml
 environment:
@@ -159,7 +159,7 @@ docker compose up -d
 # Ver qué usa el puerto
 netstat -tulpn | grep :8080
 
-# Cambiar puerto en docker-compose.yml
+# Cambiar puerto en compose.yaml
 ports:
   - "9080:80"
 ```

@@ -18,7 +18,7 @@ Repositorio organizado por modo de despliegue.
 
 ```bash
 cd docker
-# opcional: cp docker-compose.override.traefik.yml.example docker-compose.override.yml
+# opcional: cp docker-compose.override.traefik.yml.example compose.override.yaml
 docker compose up -d
 ```
 
