@@ -5,8 +5,6 @@
 .env
 .env.local
 .env.*.local
-docker-compose.override.yml
-docker/docker-compose.override.yml
 
 # Docker volumes data (if mounted locally)
 data/

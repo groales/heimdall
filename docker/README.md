@@ -1,108 +1,123 @@
-# Heimdall - Despliegue Docker
+# Heimdall - Despliegue con Docker Compose
 
-Dashboard de aplicaciones elegante y minimalista.
+Dashboard de aplicaciones elegante y minimalista para centralizar el acceso a tus servicios self-hosted.
+
+Referencia oficial de instalación: https://docs.linuxserver.io/images/docker-heimdall
 
 ## Características
 
-- 🏠 Organiza todos tus servicios en un solo lugar
-- 🎨 Personalizable con temas e iconos
-- 🔍 Búsqueda integrada
-- 📱 Diseño responsive
-- 🔌 Enhanced apps con widgets en tiempo real
+- 🏠 **Panel unificado**: Acceso rápido a todos tus servicios desde una sola página
+- 🎨 **Personalizable**: Soporte para iconos, categorías, fondos y temas
+- 🔍 **Búsqueda integrada**: Localiza aplicaciones rápidamente
+- 📱 **Diseño responsive**: Interfaz usable en escritorio y móvil
+- 🔌 **Enhanced Apps**: Widgets y datos en tiempo real para aplicaciones compatibles
+- 💾 **Persistencia simple**: Configuración almacenada en `./config`
 
-## Requisitos
+## Requisitos Previos
 
-- Docker y Docker Compose
-- Puertos 8080/8443 disponibles (o personalizables)
-- Red Docker `proxy` creada si vas a usar un proxy inverso genérico
+- Docker Engine instalado
+- Docker Compose instalado
+- Puertos `8080` y `8443` disponibles, o adaptados a tu entorno
+- Red Docker externa `proxy` creada, ya que el `compose.yaml` de este repositorio está preparado para conectarse a ella
 
-## Despliegue rápido
+> ⚠️ **Importante**: Si no vas a usar un proxy inverso genérico, elimina o comenta el bloque `networks` del `compose.yaml` antes del primer arranque.
+
+## Archivos de este Directorio
+
+Este directorio contiene:
+
+- `compose.yaml` - Configuración base del contenedor
+- `README.md` - Esta guía de despliegue
+
+---
+
+## Despliegue con Docker Compose
+
+### 1. Clonar el repositorio
 
 ```bash
-# Clonar repositorio
 git clone https://github.com/groales/heimdall.git
 cd heimdall/docker
-
-# Crear red proxy
-docker network create proxy
-
-# Desplegar
-docker compose up -d
 ```
 
-## Acceso
+### 2. Revisar la configuración base
 
-- **HTTP**: `http://IP-del-servidor:8080`
-- **HTTPS**: `https://IP-del-servidor:8443` (certificado autofirmado)
+El `compose.yaml` incluido define:
 
-## Configuración del compose
+- Imagen `lscr.io/linuxserver/heimdall:latest`
+- Publicación de puertos `8080:80` y `8443:443`
+- Persistencia local en `./config:/config`
+- Variables `PUID`, `PGID`, `TZ` y `ALLOW_INTERNAL_REQUESTS`
+- Red externa `proxy`
 
-El [heimdall/docker/compose.yaml](heimdall/docker/compose.yaml) incluye:
-
-- Imagen: `lscr.io/linuxserver/heimdall:latest`
-- Puertos publicados: 8080 → 80 y 8443 → 443
-- Volumen persistente: `./config:/config`
-- Red externa `proxy` para integrarlo con un proxy inverso genérico
-- Variables:
-  - `PUID=1000` / `PGID=1000`
-  - `TZ=Europe/Madrid`
-  - `ALLOW_INTERNAL_REQUESTS=false`
-
-## Personalización
-
-### Cambiar puertos
-
-Edita `compose.yaml`:
-
-```yaml
-ports:
-  - "9080:80"
-  - "9443:443"
-```
-
-Aplica:
+### 3. Crear la red externa
 
 ```bash
-docker compose up -d
+docker network create proxy
 ```
 
-### Ajustar zona horaria y permisos
+Si no necesitas esa red, elimina el bloque `networks` del `compose.yaml` y omite este paso.
 
-Edita variables en `compose.yaml`:
+### 4. Ajustar variables y puertos si es necesario
+
+Puedes modificar `compose.yaml` antes del arranque para adaptarlo a tu entorno:
 
 ```yaml
 environment:
-  - PUID=1000  # tu UID
-  - PGID=1000  # tu GID
+  - PUID=1000
+  - PGID=1000
   - TZ=Europe/Madrid
+  - ALLOW_INTERNAL_REQUESTS=false
+
+ports:
+  - 8080:80
+  - 8443:443
 ```
 
-Obtener tu UID/GID:
+### 5. Desplegar
 
 ```bash
-id
+docker compose up -d
 ```
 
-## Configuración inicial
+Para seguir el arranque:
 
-1. Accede a Heimdall
-2. Click en **icono de llave** 🔧
-3. **Add Application**:
-   - Application name: `Jellyfin`
-   - Icon: `jellyfin`
-   - URL: la URL real de tu servicio
-   - Description: `Servidor multimedia`
-4. **Save**
+```bash
+docker compose logs -f heimdall
+```
+
+---
+
+## Acceso Inicial
+
+Una vez desplegado, Heimdall estará disponible en:
+
+```text
+http://IP-del-servidor:8080
+https://IP-del-servidor:8443
+```
+
+El acceso por `8443` usa el certificado interno del contenedor, por lo que el navegador puede mostrar una advertencia si no hay un proxy inverso delante.
+
+### Primera Configuración
+
+1. Accede a Heimdall desde el navegador
+2. Entra en el modo de edición con el icono de llave
+3. Selecciona `Add Application`
+4. Define nombre, icono, URL y descripción de cada servicio
+5. Guarda los cambios
 
 ### Enhanced Apps
 
-Para apps compatibles (Sonarr, Radarr, qBittorrent, Pi-hole):
+Para aplicaciones compatibles como Sonarr, Radarr, qBittorrent o Pi-hole:
 
-1. Marca **Enable** en la app
-2. Añade **API Key**
-3. Configura **Enhanced options**
+1. Habilita la opción `Enhanced`
+2. Añade la API Key correspondiente
+3. Revisa las opciones avanzadas disponibles para ese conector
 
-## Operaciones
+---
+
+## Comandos Útiles
 
 ### Ver logs
 
@@ -110,84 +125,157 @@ Para apps compatibles (Sonarr, Radarr, qBittorrent, Pi-hole):
 docker compose logs -f heimdall
 ```
 
-### Reiniciar
+### Reiniciar servicio
 
 ```bash
-docker compose restart
+docker compose restart heimdall
 ```
 
-### Detener
-
-```bash
-docker compose down
-```
-
-### Actualizar
+### Actualizar contenedor
 
 ```bash
 docker compose pull
 docker compose up -d
 ```
 
-### Backup
-
-```bash
-docker run --rm \
-  -v heimdall_config:/config \
-  -v $(pwd):/backup \
-  alpine tar czf /backup/heimdall-backup-$(date +%Y%m%d).tar.gz -C /config .
-```
-
-### Restaurar
+### Detener y eliminar
 
 ```bash
 docker compose down
-
-docker run --rm \
-  -v heimdall_config:/config \
-  -v $(pwd):/backup \
-  alpine tar xzf /backup/heimdall-backup-YYYYMMDD.tar.gz -C /config
-
-docker compose up -d
 ```
 
-## Resolución de problemas
+---
 
-### Puerto ocupado
+## Estructura de Persistencia
 
-```bash
-# Ver qué usa el puerto
-netstat -tulpn | grep :8080
+```text
+Bind mount local:
+└── ./config
+    ├── appdata
+    ├── logs
+    └── configuración persistente de Heimdall
+```
 
-# Cambiar puerto en compose.yaml
+> 💡 **Tip**: Al usar un bind mount local, el backup es más simple porque basta con copiar o comprimir el directorio `config`.
+
+---
+
+## Configuración Avanzada
+
+### Variables Disponibles
+
+| Variable | Descripción | Valor por defecto en este repo |
+|----------|-------------|--------------------------------|
+| `PUID` | UID del usuario dentro del contenedor | `1000` |
+| `PGID` | GID del grupo dentro del contenedor | `1000` |
+| `TZ` | Zona horaria | `Europe/Madrid` |
+| `ALLOW_INTERNAL_REQUESTS` | Permite consultas internas desde widgets o enhanced apps | `false` |
+
+### Cambiar puertos
+
+Si `8080` o `8443` están ocupados, cambia el bloque de puertos:
+
+```yaml
 ports:
-  - "9080:80"
+  - 9080:80
+  - 9443:443
 ```
 
-### Error de permisos
-
-Verifica PUID/PGID en compose y reaplica:
+Luego reaplica:
 
 ```bash
-docker compose down
 docker compose up -d
 ```
 
-### Sin red proxy
+### Ajustar permisos y zona horaria
+
+Edita estas variables según tu host:
+
+```yaml
+environment:
+  - PUID=1000
+  - PGID=1000
+  - TZ=Europe/Madrid
+```
+
+En Linux puedes comprobar UID y GID con:
+
+```bash
+id
+```
+
+---
+
+## Solución de Problemas
+
+### El puerto ya está en uso
+
+Reasigna los puertos publicados en `compose.yaml` y vuelve a levantar el servicio.
+
+### Error por red `proxy` inexistente
 
 ```bash
 docker network create proxy
 docker compose up -d
 ```
 
-> Si no necesitas proxy inverso, puedes eliminar el bloque `networks` del compose y acceder solo por los puertos publicados.
+Si no vas a integrar Heimdall con un proxy inverso, elimina el bloque `networks` del `compose.yaml`.
 
-## Recursos
+### Problemas de permisos en `./config`
 
-- [Documentación oficial](https://docs.linuxserver.io/images/docker-heimdall)
-- [GitHub Heimdall](https://github.com/linuxserver/Heimdall)
-- [Despliegue Kubernetes](../k8s/README.md)
+Revisa los valores `PUID` y `PGID`, corrige permisos en el host si hace falta y vuelve a crear el contenedor:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+### Widgets o enhanced apps sin datos
+
+Verifica si la integración requiere acceso a endpoints internos y evalúa cambiar:
+
+```yaml
+- ALLOW_INTERNAL_REQUESTS=true
+```
+
+Hazlo solo si entiendes el impacto de seguridad y el origen de las peticiones.
 
 ---
 
-**Repositorio**: https://github.com/groales/heimdall
+## Seguridad
+
+### Recomendaciones
+
+1. Usa HTTPS real si publicas Heimdall fuera de tu red local
+2. Limita el acceso administrativo a redes de confianza o VPN
+3. Revisa cuidadosamente el uso de `ALLOW_INTERNAL_REQUESTS`
+4. Mantén copia de seguridad periódica del directorio `./config`
+5. Actualiza la imagen regularmente
+
+---
+
+## Backup y Restauración
+
+### Backup
+
+```bash
+docker compose down
+tar -czf heimdall-backup-$(date +%Y%m%d).tar.gz config
+docker compose up -d
+```
+
+### Restauración
+
+```bash
+docker compose down
+tar -xzf heimdall-backup-YYYYMMDD.tar.gz
+docker compose up -d
+```
+
+---
+
+## Recursos
+
+- Documentación oficial: https://docs.linuxserver.io/images/docker-heimdall
+- Proyecto Heimdall: https://heimdall.site
+- Despliegue Kubernetes: [../k8s/README.md](../k8s/README.md)
