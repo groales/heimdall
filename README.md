@@ -148,6 +148,32 @@ kubectl -n heimdall logs deploy/heimdall --tail=100
 
 ---
 
+## Estructura de Volúmenes
+
+- Docker Compose: `docker/config` se monta como `/config`.
+- Kubernetes: persistencia mediante PVC definido en `k8s/01-pv-pvc.yaml`.
+
+---
+
+## Configuración Avanzada
+
+- Docker: ajusta `ALLOW_INTERNAL_REQUESTS`, `TZ` y puertos directos en `docker/compose.yaml`.
+- Kubernetes: personaliza variables en `k8s/02-configmap.yaml`.
+
+---
+
+## Solución de Problemas
+
+- Docker:
+	- `docker compose -f docker/compose.yaml logs -f heimdall`
+- Kubernetes:
+	- `kubectl -n heimdall describe pod <pod>`
+	- `kubectl -n heimdall logs deploy/heimdall --tail=200`
+
+Si no responde por dominio, valida DNS y reglas de Ingress.
+
+---
+
 ## Seguridad
 
 - Publica el servicio detrás de HTTPS siempre que sea posible
@@ -157,9 +183,30 @@ kubectl -n heimdall logs deploy/heimdall --tail=100
 
 ---
 
+## Backup y Restauración
+
+- Docker: respaldo del directorio `docker/config`.
+- Kubernetes: snapshot/backup del PVC y manifiestos.
+
+---
+
+## Actualización
+
+- Docker:
+	- `docker compose -f docker/compose.yaml pull`
+	- `docker compose -f docker/compose.yaml up -d`
+- Kubernetes:
+	- actualizar imagen y reaplicar Deployment.
+
+---
+
 ## Recursos
 
 - Documentación Docker: [docker/README.md](docker/README.md)
 - Documentación Kubernetes: [k8s/README.md](k8s/README.md)
 - Documentación oficial: https://docs.linuxserver.io/images/docker-heimdall
 - Proyecto Heimdall: https://heimdall.site
+
+## Licencia
+
+Este repositorio de configuración es de uso libre. Revisa la licencia del proyecto original en su repositorio oficial.
