@@ -11,10 +11,10 @@ services:
 
     volumes:
       - ./config:/config
-    # añadir estas líneas para publicar los puertos al host
-    ports:
-      - 8080:80
-      - 8443:443
+    #Puertos expuestos para acceso directo (opcional, se recomienda usar proxy inverso)  
+    #ports:
+    #  - 8080:80
+    #  - 8443:443
     
 # añadir estas líneas al final del archivo para proxy inverso 
 networks:

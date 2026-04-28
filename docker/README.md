@@ -45,7 +45,7 @@ cd heimdall/docker
 El `compose.yaml` incluido define:
 
 - Imagen `lscr.io/linuxserver/heimdall:latest`
-- Publicación de puertos `8080:80` y `8443:443`
+- Puertos comentados para acceso directo opcional (`8080:80` y `8443:443`)
 - Persistencia local en `./config:/config`
 - Variables `PUID`, `PGID`, `TZ` y `ALLOW_INTERNAL_REQUESTS`
 - Red externa `proxy`
@@ -69,9 +69,9 @@ environment:
   - TZ=Europe/Madrid
   - ALLOW_INTERNAL_REQUESTS=false
 
-ports:
-  - 8080:80
-  - 8443:443
+#ports:
+#  - 8080:80
+#  - 8443:443
 ```
 
 ### 5. Desplegar
