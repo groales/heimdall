@@ -3,9 +3,9 @@ services:
     image: lscr.io/linuxserver/heimdall:latest
     container_name: heimdall
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-Europe/Madrid}
     ports:
       - "8080:80"
     volumes:
