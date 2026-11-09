@@ -1,0 +1,13 @@
+services:
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+    ports:
+      - "8080:80"
+    volumes:
+      - ./config:/config
+    restart: unless-stopped
